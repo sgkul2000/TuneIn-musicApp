@@ -127,6 +127,9 @@ router.get('/stream/:code/', async (req, res) => {
   const file = __dirname + '/../music/' + req.params.code + '.mp3';
   const stat = fs.statSync(file);
   const total = stat.size;
+  // if(typeof(req.params.code) === 'undefined'){
+  //   res.status(200).send();
+  // }
   if (req.headers.range) {
 
   }
