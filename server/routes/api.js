@@ -76,6 +76,10 @@ router.get('/image/:code/', async (req, res) => {
       console.log(err);
     })
   }catch(err){
+    if(typeof(req.params.code) === 'undefined' || req.params.code === 'undefined'){
+      res.status(404).send(err);
+    }
+    console.log('image error');
     console.log(err);
     res.status(404).send(err)
   }
@@ -88,6 +92,7 @@ router.get('/image/carousel/:code', async (req, res) => {
     res.sendFile(imgpath);
   } catch(err){
     console.log(err);
+    console.log('carousel err');
     res.status(404).send();
   }
 
@@ -124,45 +129,52 @@ router.get('/image/carousel/init/:code/', async (req, res) => {
 });
 
 router.get('/stream/:code/', async (req, res) => {
-  const file = __dirname + '/../music/' + req.params.code + '.mp3';
-  const stat = fs.statSync(file);
-  const total = stat.size;
-  // if(typeof(req.params.code) === 'undefined'){
-  //   res.status(200).send();
-  // }
-  if (req.headers.range) {
-
-  }
-  fs.exists(file, (exists) => {
-    if (exists) {
-      const range = req.headers.range;
-      const parts = range.replace(/bytes=/, '').split('-');
-      const partialStart = parts[0];
-      const partialEnd = parts[1];
-
-      const start = parseInt(partialStart, 10);
-      const end = partialEnd ? parseInt(partialEnd, 10) : total - 1;
-      const chunksize = (end - start) + 1;
-      const rstream = fs.createReadStream(file, {
-        start: start,
-        end: end
-      });
-
-      res.writeHead(206, {
-        'Content-Range': 'bytes ' + start + '-' + end + '/' + total,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunksize,
-        'Content-Type': 'audio/mpeg'
-      });
-      rstream.pipe(res);
-
-    } else {
-      res.send('Error - 404');
+  try{
+    const file = __dirname + '/../music/' + req.params.code + '.mp3';
+    if(typeof(req.params.code) === 'undefined' || req.params.code === 'undefined'){
+      res.status(404).send();
       res.end();
-      // res.writeHead(200, { 'Content-Length': total, 'Content-Type': 'audio/mpeg' });
-      // fs.createReadStream(path).pipe(res);
+      console.log('yaar ab bhi ye bakchodi chal rahi hai beforeCreate')
     }
-  });
+    const stat = fs.statSync(file);
+    const total = stat.size;
+    if (req.headers.range) {
+
+    }
+    fs.exists(file, (exists) => {
+      if (exists) {
+        const range = req.headers.range;
+        const parts = range.replace(/bytes=/, '').split('-');
+        const partialStart = parts[0];
+        const partialEnd = parts[1];
+
+        const start = parseInt(partialStart, 10);
+        const end = partialEnd ? parseInt(partialEnd, 10) : total - 1;
+        const chunksize = (end - start) + 1;
+        const rstream = fs.createReadStream(file, {
+          start: start,
+          end: end
+        });
+
+        res.writeHead(206, {
+          'Content-Range': 'bytes ' + start + '-' + end + '/' + total,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Type': 'audio/mpeg'
+        });
+        rstream.pipe(res);
+
+      } else {
+        res.send('Error - 404');
+        res.end();
+        // res.writeHead(200, { 'Content-Length': total, 'Content-Type': 'audio/mpeg' });
+        // fs.createReadStream(path).pipe(res);
+      }
+    });
+  } catch(err) {
+    // console.log(err);
+    // res.status(404).send();
+  }
 });
 
 router.get('/play/:name', async (req, res) => {

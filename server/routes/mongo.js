@@ -1,5 +1,7 @@
 const mongodb = require('mongodb');
-const mongoUri = 'mongodb://localhost'
+// const mongoUri = 'mongodb://localhost'
+const mongoUri = "mongodb+srv://shreesh:gottastoreemall@projectcorontine-ohoqg.mongodb.net/test?retryWrites=true&w=majority";
+
 
 module.exports = class mongo {
   static async getSongs() {
